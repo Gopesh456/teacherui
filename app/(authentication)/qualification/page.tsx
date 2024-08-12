@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 const FormSchema = z.object({
   bio: z
     .string()
@@ -56,9 +56,7 @@ const QualificationPage = () => {
             name="bio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-lg">
-                  Qualifications
-                </FormLabel>
+                <FormLabel className="text-lg">Qualifications</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Tell us a little bit about your Qualifications"

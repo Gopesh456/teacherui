@@ -8,21 +8,25 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { SignUpService } from "@/service/signup.service";
 
 const LoginPage = () => {
+  const [loading, setLoading] = useState(false);
+  const signUpService = new SignUpService();
   const router = useRouter();
   const UserSchema = z
     .object({
-      fname: z.string().min(1),
+      name: z.string().min(1),
       phone: z
         .string()
         .min(10)
         .regex(/^((\+971)|0)?5[024568][0-9]{7}$/, "Invalid UAE phone number"),
       email: z.string().email().min(1),
-      passwd: z.string().min(6),
+      password: z.string().min(6),
       cpasswd: z.string().min(6),
     })
-    .refine((data) => data.passwd === data.cpasswd, {
+    .refine((data) => data.password === data.cpasswd, {
       message: "Passwords do not match",
       path: ["cpasswd"],
     });
@@ -36,6 +40,15 @@ const LoginPage = () => {
   } = useForm<User>({ resolver: zodResolver(UserSchema), mode: "onTouched" });
   const onSubmit: SubmitHandler<User> = (data) => {
     console.log(data);
+    setLoading(true);
+    signUpService
+      .signUp(data)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     router.push("/qualification");
   };
   return (
@@ -46,21 +59,21 @@ const LoginPage = () => {
             Create an account
           </div>
           <div className=" grid grid-cols-2 gap-5 w-full place-content-start row-span-1 h-auto">
-            <div className="fname col-span-1 w-[22.5rem]">
+            <div className="name col-span-1 w-[22.5rem]">
               <label
-                htmlFor="fname"
+                htmlFor="name"
                 className="text-white focus:outline-slate-800 w-[22.5rem] font-[400]"
               >
                 Full Name
               </label>
               <Input
                 type="text"
-                id="fname"
-                {...register("fname", { required: true })}
+                id="name"
+                {...register("name", { required: true })}
                 className="  py-3 rounded-sm col-span-full h-[3rem] focus:outline-slate-800 w-full"
                 placeholder="Enter your full name"
               />
-              <p className="text-red-500 pl-2">{errors.fname?.message}</p>
+              <p className="text-red-500 pl-2">{errors.name?.message}</p>
             </div>
 
             <div className="phone col-span-1 ">
@@ -99,21 +112,21 @@ const LoginPage = () => {
             </div>
           </div>
           <div className=" grid grid-cols-2 h-auto gap-5 place-content-start row-span-1">
-            <div className="passwd col-span-1 ">
+            <div className="password col-span-1 ">
               <label
-                htmlFor="passwd"
+                htmlFor="password"
                 className="text-white focus:outline-slate-800 w-[22.5rem] font-[400]"
               >
                 Password
               </label>
               <Input
                 type="password"
-                id="passwd"
-                {...register("passwd", { required: true })}
+                id="password"
+                {...register("password", { required: true })}
                 className="  py-3 rounded-sm col-span-full h-[3rem] focus:outline-slate-800 w-full"
                 placeholder="Enter a Strong Password"
               />
-              <p className="text-red-500 pl-2">{errors.passwd?.message}</p>
+              <p className="text-red-500 pl-2">{errors.password?.message}</p>
             </div>
             <div className="cpasswd col-span-1">
               <label

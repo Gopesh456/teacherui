@@ -6,13 +6,19 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTheme } from "next-themes";
-
+import { useRouter } from "next/navigation";
+import { SignInService } from "@/service/login.service";
+import { useToast } from "@/components/ui/use-toast";
+import { title } from "process";
 // install shadcn
 // install zod
 // install reacthookform
 
 const LoginPage = () => {
+  const signInService = new SignInService();
   const { setTheme } = useTheme();
+  const router = useRouter();
+  const { toast } = useToast();
   setTheme("system");
   const UserSchema = z.object({
     email: z.string().email().min(5),
@@ -26,6 +32,24 @@ const LoginPage = () => {
   } = useForm<formFields>({ resolver: zodResolver(UserSchema) });
   const onSubmit: SubmitHandler<formFields> = (data) => {
     console.log(data);
+    signInService
+      .signIn(data)
+      .then((res) => {
+        console.log("res", res);
+        console.log("success");
+        if (res.status === 200) {
+          toast({ title: "Login Success" });
+          router.push("/studentlist");
+        } else if (res.status === 402) {
+          // wrong email
+          toast({ title: "Email not found" });
+        }
+      })
+      .catch((error) => {
+        console.log("error", error);
+        console.log("err");
+        toast({ title: "Wrong Password" });
+      });
   };
   return (
     <div className="container-lg grid justify-center w-screen h-screen content-center">

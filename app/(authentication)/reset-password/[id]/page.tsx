@@ -8,9 +8,12 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { ForgetPasswdService } from "@/service/forgetpasswd.service";
+import { useParams } from "next/navigation";
 const ResetPage = () => {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
+  const ForgetpasswdService = new ForgetPasswdService();
   const UserSchema = z
     .object({
       passwd: z.string().min(6),
@@ -30,7 +33,19 @@ const ResetPage = () => {
   } = useForm<User>({ resolver: zodResolver(UserSchema), mode: "onTouched" });
   const onSubmit: SubmitHandler<User> = (data) => {
     console.log(data);
-    router.push("/done");
+    if (data.passwd === data.cpasswd) {
+      let obj = { password: data.passwd, id: params.id };
+      ForgetpasswdService.resetPassword(obj)
+        .then((res) => {
+          console.log("res", res);
+          if (res.status === 200) {
+            router.push("/done");
+          }
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
+    }
   };
   return (
     <div className="grid h-screen w-screen place-content-center justify-center">

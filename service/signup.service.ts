@@ -13,4 +13,11 @@ export class SignUpService extends APIService {
         throw error;
       });
   }
+  async qualification(data: any) {
+    return this.post("teacher/qualifications/", data)
+      .then((res) => res.data)
+      .catch((error) => {
+        throw error;
+      });
+  }
 }

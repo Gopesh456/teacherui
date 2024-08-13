@@ -10,6 +10,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Toast } from "@/components/ui/toast";
 import { Textarea } from "@/components/ui/textarea";
+import { ForgetPasswdService } from "@/service/forgetpasswd.service";
+import { useState } from "react";
+
 import {
   Form,
   FormControl,
@@ -22,6 +25,8 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 
 const ForgotPassword = () => {
+  const [loading, setLoading] = useState(false);
+  const ForgetpasswdService = new ForgetPasswdService();
   const router = useRouter();
   const { toast } = useToast();
   const FormSchema = z.object({
@@ -34,11 +39,27 @@ const ForgotPassword = () => {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("data", data);
     if (data.email) {
-      toast({
-        title: "Email sent",
-        description: "We have sent you an OTP to reset your password.",
-      });
-      router.push("/otp");
+      ForgetpasswdService.resetEmail(data)
+        .then((res) => {
+          console.log("res", res);
+          if (res.status === 200) {
+            toast({
+              title: "Email sent",
+              description: "We have sent you an email with reset instructions",
+              duration: 5000,
+            });
+            router.push("/otp/" + res.id);
+          } else {
+            toast({
+              title: "Error",
+              description: "This email is not registered with us",
+              duration: 5000,
+            });
+          }
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     }
   }
 

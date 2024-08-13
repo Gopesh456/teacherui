@@ -3,6 +3,8 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useState } from "react";
+import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +19,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { SignUpService } from "@/service/signup.service";
+
 const FormSchema = z.object({
   bio: z
     .string()
@@ -29,6 +33,10 @@ const FormSchema = z.object({
 });
 
 const QualificationPage = () => {
+  const params = useParams<{ id: string }>();
+  console.log(params.id);
+  const [loading, setLoading] = useState(false);
+  const signUpService = new SignUpService();
   const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -37,12 +45,36 @@ const QualificationPage = () => {
   const { toast } = useToast();
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log("data", data);
-    toast({
-      title: "Registration Successful",
-      description: "Teacher Registed",
-    });
-    router.push("/login");
+    setLoading(true);
+    let obj = {
+      qualifications: data.bio,
+      id: params.id,
+    };
+    console.log("data", obj);
+    signUpService
+      .qualification(obj)
+      .then((res) => {
+        console.log("signup is runnign");
+        console.log("res: ", res);
+        if (res.status === 201) {
+          router.push("/login");
+          console.log("success");
+          toast({
+            title: "Registration Successful",
+            description: "Teacher Registed",
+          });
+        } else if (res.status === 400) {
+          toast({
+            title: "Registration Failed",
+            description: "Invalid Qualification Request",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // router.push("/login");
   }
   return (
     <div className=" w-screen h-screen grid place-content-center">

@@ -7,6 +7,8 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MailOpen, MoveLeft } from "lucide-react";
+import { useParams } from "next/navigation";
+import { ForgetPasswdService } from "@/service/forgetpasswd.service";
 
 import {
   Form,
@@ -32,6 +34,8 @@ const FormSchema = z.object({
 });
 
 const OTPPage = () => {
+  const ForgetpasswdService = new ForgetPasswdService();
+  const params = useParams<{ id: string }>();
   const { setTheme } = useTheme();
   const { toast } = useToast();
   const router = useRouter();
@@ -45,7 +49,32 @@ const OTPPage = () => {
   });
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("data", data);
-    router.push("/reset-password");
+    let obj = { otp: data.pin, id: params.id };
+    ForgetpasswdService.resetOtp(obj)
+      .then((res) => {
+        console.log("res", res);
+        if (res.status === 201) {
+          toast({
+            title: "Success",
+            description: "Change your password",
+            duration: 5000,
+          });
+          router.push("/reset-password/" + params.id);
+        } else {
+          toast({
+            title: "Error",
+            description: "Invalid one-time password",
+            duration: 5000,
+          });
+        }
+      })
+      .catch((error) => {
+        toast({
+          title: "Error",
+          description: "Invalid one-time password",
+          duration: 5000,
+        });
+      });
   }
 
   return (

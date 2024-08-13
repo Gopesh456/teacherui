@@ -7,6 +7,7 @@ import { ArrowRight, MoveLeft } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { StudentService } from "@/service/student.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
@@ -17,6 +18,8 @@ import {
 } from "@/components/ui/select";
 
 const LoginPage = () => {
+  const studentService = new StudentService();
+
   const router = useRouter();
   const MAX_FILE_SIZE = 500000;
   const ACCEPTED_IMAGE_TYPES = [
@@ -67,6 +70,16 @@ const LoginPage = () => {
   const onSubmit: SubmitHandler<User> = (data) => {
     console.log("its working");
     console.log(data);
+    let obj = {
+      firstName: data.fname,
+      lastName: data.lname,
+      gender: data.gender,
+      grade: data.grade,
+      parentName: data.f_fname,
+      parentEmail : data.email,
+      parentPhone: data.m_fname,
+      displayImage: data.image[0],
+    }
     router.push("/studesc");
   };
   const [selectedOption, setSelectedOption] = useState("apple");

@@ -10,11 +10,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SignUpService } from "@/service/signup.service";
+import { useToast } from "@/components/ui/use-toast";
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const signUpService = new SignUpService();
   const router = useRouter();
+  const { toast } = useToast();
   const UserSchema = z
     .object({
       name: z.string().min(1),
@@ -39,17 +41,34 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<User>({ resolver: zodResolver(UserSchema), mode: "onTouched" });
   const onSubmit: SubmitHandler<User> = (data) => {
-    console.log(data);
     setLoading(true);
     signUpService
       .signUp(data)
       .then((res) => {
         console.log(res);
+        console.log("success");
+        if (res.status === 201) {
+          router.push("/qualification/" + res.id);
+        }
+        if (res.message == "Teacher email already exists!") {
+          toast({
+            title: "Registration Failed",
+            description: "Teacher email already exists!",
+          });
+          router.push("/login");
+        } else if (res.status === 401) {
+          toast({
+            title: "Registration Failed",
+            description: "Try Again Later",
+          });
+        }
       })
       .catch((error) => {
         console.log(error);
+        console.log("error");
       });
-    router.push("/qualification");
+
+    // router.push("/qualification");
   };
   return (
     <div className="w-screen h-screen grid place-content-center">

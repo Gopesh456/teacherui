@@ -39,7 +39,7 @@ const LoginPage = () => {
         console.log("success");
         if (res.status === 200) {
           toast({ title: "Login Success" });
-          router.push("/studentlist");
+          router.push("/studentlist/" + res.id);
         } else if (res.status === 402) {
           // wrong email
           toast({ title: "Email not found" });

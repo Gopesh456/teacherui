@@ -16,9 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useParams } from "next/navigation";
 
 const LoginPage = () => {
   const studentService = new StudentService();
+  const params = useParams<{ id: string }>();
 
   const router = useRouter();
   const MAX_FILE_SIZE = 500000;
@@ -76,11 +78,28 @@ const LoginPage = () => {
       gender: data.gender,
       grade: data.grade,
       parentName: data.f_fname,
-      parentEmail : data.email,
+      parentEmail: data.email,
       parentPhone: data.m_fname,
       displayImage: data.image[0],
-    }
-    router.push("/studesc");
+      teacher: params.id,
+    };
+    console.log("obj", obj);
+    studentService
+      .addStudent(obj)
+      .then((res) => {
+        console.log("res", res);
+        if (res.status === 200) {
+          console.log("success");
+          // router.push("/studentlist/" + params.id);
+        } else if (res.status === 400) {
+          console.log("Invalid request");
+        }
+      })
+      .catch((error) => {
+        console.log("error", error);
+        console.log("err");
+      });
+    // router.push("/studentlist/" + params.id);
   };
   const [selectedOption, setSelectedOption] = useState("apple");
 
